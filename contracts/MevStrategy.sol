@@ -20,7 +20,7 @@ import "./FlashLoanReceiver.sol";
  * @dev Main contract for executing MEV strategies including sandwich attacks and arbitrage
  * This contract serves as the entry point for all MEV operations
  */
-contract MevStrategy is Ownable, ReentrancyGuard, Upgradeable {
+contract MevStrategy is ReentrancyGuard, Upgradeable {
     using PriceCalculator for uint256;
     using GasOptimizer for uint256;
     
@@ -95,7 +95,8 @@ contract MevStrategy is Ownable, ReentrancyGuard, Upgradeable {
         address _balancerFlashLoan
     ) {
         uniswapRouter = IUniswapV2Router02(_uniswapRouter);
-        uniswapFactory = IUniswapV2Factory(uniswapRouter.factory());
+        // Don't try to access factory() during construction to avoid deployment issues
+        uniswapFactory = IUniswapV2Factory(address(0));
         aaveFlashLoan = IAaveFlashLoan(_aaveFlashLoan);
         balancerFlashLoan = IBalancerFlashLoan(_balancerFlashLoan);
         
@@ -110,6 +111,24 @@ contract MevStrategy is Ownable, ReentrancyGuard, Upgradeable {
             useAave: true,
             useBalancer: false
         });
+    }
+    
+    /**
+     * @dev Initialize the factory address after deployment
+     * @param _factory Factory address to set
+     */
+    function setFactory(address _factory) external onlyOwner {
+        require(address(uniswapFactory) == address(0), "Factory already set");
+        uniswapFactory = IUniswapV2Factory(_factory);
+    }
+    
+    /**
+     * @dev Initialize the factory by getting it from router
+     * Only use this in production environments where the router is a real contract
+     */
+    function initializeFactory() external onlyOwner {
+        require(address(uniswapFactory) == address(0), "Factory already set");
+        uniswapFactory = IUniswapV2Factory(uniswapRouter.factory());
     }
     
     /**
@@ -460,7 +479,7 @@ contract MevStrategy is Ownable, ReentrancyGuard, Upgradeable {
         emit ProfitWithdrawn(token, recipient, amount);
     }
     
-    /**
+/**
      * @dev Calculates the expected profit from a sandwich attack
      * @param pair Uniswap pair address
      * @param tokenIn Input token
@@ -476,20 +495,41 @@ contract MevStrategy is Ownable, ReentrancyGuard, Upgradeable {
         uint256 frontRunAmount,
         uint256 victimAmount
     ) external view returns (uint256 expectedProfit) {
-        // Get reserves
-        (uint256 reserve0, uint256 reserve1) = UniswapV2Library.getReserves(
-            address(uniswapFactory),
-            tokenIn,
-            tokenOut
-        );
+        // Verify the factory is set
+        require(address(uniswapFactory) != address(0), "Factory not set");
+        
+        // Get reserves from pair directly to avoid potential issues
+        IUniswapV2Pair pairContract = IUniswapV2Pair(pair);
+        (uint256 reserve0, uint256 reserve1,) = pairContract.getReserves();
+        
+        // Get token order in the pair
+        address token0 = pairContract.token0();
+        address token1 = pairContract.token1();
+        
+        // Determine which reserves correspond to which tokens
+        uint256 reserveIn;
+        uint256 reserveOut;
+        bool zeroForOne;
+        
+        if (token0 == tokenIn && token1 == tokenOut) {
+            reserveIn = reserve0;
+            reserveOut = reserve1;
+            zeroForOne = true;
+        } else if (token1 == tokenIn && token0 == tokenOut) {
+            reserveIn = reserve1;
+            reserveOut = reserve0;
+            zeroForOne = false;
+        } else {
+            revert("Invalid token pair");
+        }
         
         // Calculate price impact and expected profit
         expectedProfit = PriceCalculator.calculateSandwichProfit(
-            reserve0,
-            reserve1,
+            reserveIn,
+            reserveOut,
             frontRunAmount,
             victimAmount,
-            tokenIn < tokenOut
+            zeroForOne
         );
         
         // Account for gas costs
