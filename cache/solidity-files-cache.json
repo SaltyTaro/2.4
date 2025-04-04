@@ -1,0 +1,744 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/FlashLoanReceiver.sol": {
+      "lastModificationDate": 1743776727530,
+      "contentHash": "01c410f835186823a01244658da049c7",
+      "sourceName": "contracts/FlashLoanReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV2Router.sol",
+        "./interfaces/IUniswapV2Pair.sol",
+        "./interfaces/IAaveFlashLoan.sol",
+        "./interfaces/IBalancerFlashLoan.sol",
+        "./interfaces/IERC20.sol",
+        "./libraries/UniswapV2Library.sol",
+        "./libraries/PriceCalculator.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "FlashLoanReceiver"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/interfaces/IUniswapV2Router.sol": {
+      "lastModificationDate": 1743775085131,
+      "contentHash": "2a85305fd32d0b3701990ea4dc9670d8",
+      "sourceName": "contracts/interfaces/IUniswapV2Router.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "IUniswapV2Router01",
+        "IUniswapV2Router02"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/interfaces/IUniswapV2Pair.sol": {
+      "lastModificationDate": 1743775093161,
+      "contentHash": "a3453c3cfcf540b6b7ad192ffbbbb214",
+      "sourceName": "contracts/interfaces/IUniswapV2Pair.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "IUniswapV2Pair"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/interfaces/IAaveFlashLoan.sol": {
+      "lastModificationDate": 1743775109433,
+      "contentHash": "81492d24e465e04b19cca18b9a97ce2a",
+      "sourceName": "contracts/interfaces/IAaveFlashLoan.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "IAaveFlashLoan"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/interfaces/IBalancerFlashLoan.sol": {
+      "lastModificationDate": 1743775127481,
+      "contentHash": "5f1574bc6ea810afe2c4325d87ac34fb",
+      "sourceName": "contracts/interfaces/IBalancerFlashLoan.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "IBalancerFlashLoan"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/interfaces/IERC20.sol": {
+      "lastModificationDate": 1743775132649,
+      "contentHash": "1a4b470de91f878ff261515ea858b22f",
+      "sourceName": "contracts/interfaces/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/libraries/UniswapV2Library.sol": {
+      "lastModificationDate": 1743775146409,
+      "contentHash": "5308b5bf22c4e99346dd83abf233a8d5",
+      "sourceName": "contracts/libraries/UniswapV2Library.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IUniswapV2Factory.sol",
+        "../interfaces/IUniswapV2Pair.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "UniswapV2Library"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/libraries/PriceCalculator.sol": {
+      "lastModificationDate": 1743775156001,
+      "contentHash": "0206dacd6d32fdb9138e96baec588eff",
+      "sourceName": "contracts/libraries/PriceCalculator.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "PriceCalculator"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/interfaces/IUniswapV2Factory.sol": {
+      "lastModificationDate": 1743775100888,
+      "contentHash": "9a36356b6494be81945c18907ff4f85d",
+      "sourceName": "contracts/interfaces/IUniswapV2Factory.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "IUniswapV2Factory"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/MevStrategy.sol": {
+      "lastModificationDate": 1743776984090,
+      "contentHash": "b1bf09f6626039f472581f61cc3e9fa0",
+      "sourceName": "contracts/MevStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV2Router.sol",
+        "./interfaces/IUniswapV2Pair.sol",
+        "./interfaces/IUniswapV2Factory.sol",
+        "./interfaces/IAaveFlashLoan.sol",
+        "./interfaces/IBalancerFlashLoan.sol",
+        "./interfaces/IERC20.sol",
+        "./libraries/UniswapV2Library.sol",
+        "./libraries/PriceCalculator.sol",
+        "./libraries/GasOptimizer.sol",
+        "./utils/Ownable.sol",
+        "./utils/ReentrancyGuard.sol",
+        "./utils/Upgradeable.sol",
+        "./FlashLoanReceiver.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "MevStrategy"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/libraries/GasOptimizer.sol": {
+      "lastModificationDate": 1743775163272,
+      "contentHash": "6e91273ec31900ad66f742723bdc0c2b",
+      "sourceName": "contracts/libraries/GasOptimizer.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "GasOptimizer"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/utils/Ownable.sol": {
+      "lastModificationDate": 1743775185673,
+      "contentHash": "1e902fa0e29fa67d291c14bfd65eb263",
+      "sourceName": "contracts/utils/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/utils/ReentrancyGuard.sol": {
+      "lastModificationDate": 1743775190360,
+      "contentHash": "1aa102b473af50249630921d9f52a5e1",
+      "sourceName": "contracts/utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/utils/Upgradeable.sol": {
+      "lastModificationDate": 1743775195416,
+      "contentHash": "48275e827bd0135a4c41513d1ab7ae11",
+      "sourceName": "contracts/utils/Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "Upgradeable"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/libraries/SafeMath.sol": {
+      "lastModificationDate": 1743775171513,
+      "contentHash": "e1d35dd79fc206eded735bb21fe0972d",
+      "sourceName": "contracts/libraries/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/mocks/TestFlashLoanReceiver.sol": {
+      "lastModificationDate": 1743776612172,
+      "contentHash": "90af91634801ff2a5365c3b05b35fa1c",
+      "sourceName": "contracts/mocks/TestFlashLoanReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../FlashLoanReceiver.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "TestFlashLoanReceiver"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/mocks/MaliciousReceiver.sol": {
+      "lastModificationDate": 1743776794249,
+      "contentHash": "340509670ccba8e909468aff7054dff6",
+      "sourceName": "contracts/mocks/MaliciousReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IERC20.sol",
+        "../MevStrategy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "MaliciousReceiver"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/mocks/MockERC20.sol": {
+      "lastModificationDate": 1743776546378,
+      "contentHash": "19ff5b9372922479cfcce477a90603aa",
+      "sourceName": "contracts/mocks/MockERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "MockERC20"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/mocks/GasOptimizerTest.sol": {
+      "lastModificationDate": 1743776580154,
+      "contentHash": "a2ba56780529a44995ab4fb8382512cb",
+      "sourceName": "contracts/mocks/GasOptimizerTest.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/GasOptimizer.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "GasOptimizerTest"
+      ]
+    },
+    "/home/madhav/Desktop/crypto/2.4/mev-strategy/contracts/mocks/MockPair.sol": {
+      "lastModificationDate": 1743776564138,
+      "contentHash": "14e603f7b6df111edeabba0b7f6c2ca7",
+      "sourceName": "contracts/mocks/MockPair.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "MockPair"
+      ]
+    }
+  }
+}
