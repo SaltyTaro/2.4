@@ -2,27 +2,28 @@
  * MEV Opportunity Detector
  * Analyzes transaction data and market conditions to find MEV opportunities
  */
-const ethers = require('ethers');
-const { Logger } = require('../../infrastructure/logging');
-const { StrategySimulator } = require('./strategy-simulator');
-const { DEX_ADDRESSES, TOKEN_ADDRESSES } = require('../../utils/constants');
-const { findMultiHopPath } = require('../../utils/path-finder');
-const { getReserves, getAmountOut } = require('../../utils/dex-utils');
+const ethers = require("hardhat");
+const { Logger } = require("../../infrastructure/logging");
+const { StrategySimulator } = require("./strategy-simulator");
+const { DEX_ADDRESSES, TOKEN_ADDRESSES } = require("../../utils/constants");
+const { findMultiHopPath } = require("../../utils/path-finder");
+const { getReserves, getAmountOut } = require("../../utils/dex-utils");
+const { getPriceInEth, getPriceInUsd } = require("../../utils/price-utils");
 
 // Logger setup
-const logger = new Logger('OpportunityDetector');
+const logger = new Logger("OpportunityDetector");
 
 class OpportunityDetector {
   constructor(options = {}) {
     this.options = {
-      minProfitThreshold: ethers.utils.parseEther('0.01'), // 0.01 ETH
+      minProfitThreshold: ethers.utils.parseEther("0.01"), // 0.01 ETH
       minProfitThresholdUsd: 50, // $50 USD
       minRoiBps: 50, // 0.5% minimum ROI
-      maxExposure: ethers.utils.parseEther('100'), // Maximum 100 ETH exposure
+      maxExposure: ethers.utils.parseEther("100"), // Maximum 100 ETH exposure
       maxPoolUsageBps: 100, // 1% maximum pool reserves usage
       blacklistedAddresses: [], // Addresses to avoid targeting
       blacklistedTokens: [], // Tokens to avoid
-      rpcUrl: process.env.ETH_RPC_URL || 'https://eth-mainnet.alchemyapi.io/v2/your-api-key',
+      rpcUrl: process.env.ETH_RPC_URL || "https://eth-mainnet.alchemyapi.io/v2/your-api-key",
       ...options
     };
     
@@ -50,7 +51,7 @@ class OpportunityDetector {
    */
   async initialize() {
     try {
-      logger.info('Initializing opportunity detector...');
+      logger.info("Initializing opportunity detector...");
       
       // Create provider
       this.provider = new ethers.providers.JsonRpcProvider(this.options.rpcUrl);
@@ -61,10 +62,10 @@ class OpportunityDetector {
       });
       await this.simulator.initialize();
       
-      logger.info('Opportunity detector initialized successfully');
+      logger.info("Opportunity detector initialized successfully");
       return true;
     } catch (error) {
-      logger.error('Failed to initialize opportunity detector:', error);
+      logger.error("Failed to initialize opportunity detector:", error);
       throw error;
     }
   }
@@ -97,18 +98,18 @@ class OpportunityDetector {
         strategies: [],
         bestStrategy: null,
         estimatedProfit: ethers.constants.Zero,
-        estimatedProfitUsd: '0.00',
+        estimatedProfitUsd: "0.00",
         gasInfo,
         targetTx: analysis.details?.swap || {},
         timestamp: Date.now()
       };
       
       // Determine opportunity type and best strategy
-      if (analysis.opportunityTypes.includes('sandwich')) {
-        opportunity.type = 'sandwich';
+      if (analysis.opportunityTypes.includes("sandwich")) {
+        opportunity.type = "sandwich";
         
         // Get sandwich strategy details
-        const sandwichStrategy = analysis.strategies.find(s => s.type === 'sandwich');
+        const sandwichStrategy = analysis.strategies.find(s => s.type === "sandwich");
         if (sandwichStrategy) {
           // Simulate the strategy to verify profit
           const simulationResult = await this.simulator.simulateSandwich(
@@ -136,11 +137,11 @@ class OpportunityDetector {
             }
           }
         }
-      } else if (analysis.opportunityTypes.includes('arbitrage')) {
-        opportunity.type = 'arbitrage';
+      } else if (analysis.opportunityTypes.includes("arbitrage")) {
+        opportunity.type = "arbitrage";
         
         // Get arbitrage strategy details
-        const arbitrageStrategy = analysis.strategies.find(s => s.type === 'arbitrage');
+        const arbitrageStrategy = analysis.strategies.find(s => s.type === "arbitrage");
         if (arbitrageStrategy) {
           // Simulate the strategy to verify profit
           const simulationResult = await this.simulator.simulateArbitrage(
@@ -166,9 +167,9 @@ class OpportunityDetector {
             }
           }
         }
-      } else if (analysis.opportunityTypes.includes('frontrun') || analysis.opportunityTypes.includes('backrun')) {
+      } else if (analysis.opportunityTypes.includes("frontrun") || analysis.opportunityTypes.includes("backrun")) {
         // Front-run or back-run (not sandwich)
-        opportunity.type = analysis.opportunityTypes.includes('frontrun') ? 'frontrun' : 'backrun';
+        opportunity.type = analysis.opportunityTypes.includes("frontrun") ? "frontrun" : "backrun";
         
         // Get the strategy details
         const strategy = analysis.strategies.find(s => s.type === opportunity.type);
@@ -258,9 +259,12 @@ class OpportunityDetector {
       
       const optimizedFrontRunAmount = frontRunAmount.gt(maxAmount) ? maxAmount : frontRunAmount;
       
+      // Calculate estimated profit in USD
+      const profitUsd = await this.convertEthToUsd(netProfit);
+      
       // Create the detailed strategy
       return {
-        type: 'sandwich',
+        type: "sandwich",
         targetHash: analysis.hash,
         pairAddress: swap.pairAddress,
         tokenIn: swap.tokenIn,
@@ -270,7 +274,7 @@ class OpportunityDetector {
         frontRunAmount: optimizedFrontRunAmount.toString(),
         victimAmount: swap.amountIn,
         estimatedProfit: netProfit,
-        estimatedProfitUsd: await this.convertEthToUsd(netProfit),
+        estimatedProfitUsd: profitUsd,
         gasInfo: {
           gasPrice: gasPrice.toString(),
           frontRunGasLimit,
@@ -285,7 +289,7 @@ class OpportunityDetector {
             tokenIn: swap.tokenIn,
             tokenOut: swap.tokenOut,
             amountIn: optimizedFrontRunAmount.toString(),
-            amountOutMin: '0', // Set to 0 for simplicity - in production would use slippage tolerance
+            amountOutMin: "0", // Set to 0 for simplicity - in production would use slippage tolerance
             path: [swap.tokenIn, swap.tokenOut],
             deadline: Math.floor(Date.now() / 1000) + 300 // 5 minutes
           },
@@ -294,7 +298,7 @@ class OpportunityDetector {
             tokenIn: swap.tokenOut, // Reversed for back-run
             tokenOut: swap.tokenIn, // Reversed for back-run
             amountInEstimated: simulation.frontRunOutput.toString(),
-            amountOutMin: '0', // Set to 0 for simplicity - in production would use slippage tolerance
+            amountOutMin: "0", // Set to 0 for simplicity - in production would use slippage tolerance
             path: [swap.tokenOut, swap.tokenIn],
             deadline: Math.floor(Date.now() / 1000) + 300 // 5 minutes
           }
@@ -338,16 +342,19 @@ class OpportunityDetector {
         return null;
       }
       
+      // Calculate USD value of profit
+      const profitUsd = await this.convertEthToUsd(netProfit);
+      
       // Create the detailed strategy
       return {
-        type: 'arbitrage',
+        type: "arbitrage",
         sourcePool: strategy.sourcePool,
         targetPool: strategy.targetPool,
         tokenA: strategy.tokenA,
         tokenB: strategy.tokenB,
         amount: arbAmount.toString(),
         estimatedProfit: netProfit,
-        estimatedProfitUsd: await this.convertEthToUsd(netProfit),
+        estimatedProfitUsd: profitUsd,
         gasInfo: {
           gasPrice: gasPrice.toString(),
           gasLimit,
@@ -355,8 +362,15 @@ class OpportunityDetector {
         },
         roiBps: roiBps.toNumber(),
         execution: {
-          // Simplified execution parameters
-          // In production, would include detailed sequencing of swaps
+          // Execution parameters
+          sourceRouter: DEX_ADDRESSES.UNISWAP_V2_ROUTER,
+          targetRouter: DEX_ADDRESSES.SUSHISWAP_ROUTER,
+          tokenIn: strategy.tokenA,
+          tokenMid: strategy.tokenB,
+          amountIn: arbAmount.toString(),
+          sourceAmountOutMin: "0", // Would use slippage tolerance in production
+          targetAmountOutMin: "0", // Would use slippage tolerance in production
+          deadline: Math.floor(Date.now() / 1000) + 300 // 5 minutes
         }
       };
     } catch (error) {
@@ -392,7 +406,7 @@ class OpportunityDetector {
       
       // Calculate ROI
       let amount;
-      if (strategy.type === 'frontrun') {
+      if (strategy.type === "frontrun") {
         amount = ethers.BigNumber.from(strategy.frontRunAmount);
       } else {
         amount = ethers.BigNumber.from(strategy.backRunAmount);
@@ -411,10 +425,13 @@ class OpportunityDetector {
       
       const optimizedAmount = amount.gt(maxAmount) ? maxAmount : amount;
       
+      // Calculate USD value of profit
+      const profitUsd = await this.convertEthToUsd(netProfit);
+      
       // Create the detailed strategy
-      if (strategy.type === 'frontrun') {
+      if (strategy.type === "frontrun") {
         return {
-          type: 'frontrun',
+          type: "frontrun",
           targetHash: analysis.hash,
           pairAddress: swap.pairAddress,
           tokenIn: swap.tokenIn,
@@ -423,7 +440,7 @@ class OpportunityDetector {
           tokenOutSymbol: swap.tokenOutSymbol,
           amount: optimizedAmount.toString(),
           estimatedProfit: netProfit,
-          estimatedProfitUsd: await this.convertEthToUsd(netProfit),
+          estimatedProfitUsd: profitUsd,
           gasInfo: {
             gasPrice: gasPrice.toString(),
             gasLimit,
@@ -436,7 +453,7 @@ class OpportunityDetector {
               tokenIn: swap.tokenIn,
               tokenOut: swap.tokenOut,
               amountIn: optimizedAmount.toString(),
-              amountOutMin: '0', // Set to 0 for simplicity - in production would use slippage tolerance
+              amountOutMin: "0", // Set to 0 for simplicity - in production would use slippage tolerance
               path: [swap.tokenIn, swap.tokenOut],
               deadline: Math.floor(Date.now() / 1000) + 300 // 5 minutes
             }
@@ -444,7 +461,7 @@ class OpportunityDetector {
         };
       } else { // backrun
         return {
-          type: 'backrun',
+          type: "backrun",
           targetHash: analysis.hash,
           pairAddress: swap.pairAddress,
           tokenIn: swap.tokenOut, // Reversed for back-run
@@ -453,7 +470,7 @@ class OpportunityDetector {
           tokenOutSymbol: swap.tokenInSymbol,
           amount: optimizedAmount.toString(),
           estimatedProfit: netProfit,
-          estimatedProfitUsd: await this.convertEthToUsd(netProfit),
+          estimatedProfitUsd: profitUsd,
           gasInfo: {
             gasPrice: gasPrice.toString(),
             gasLimit,
@@ -466,7 +483,7 @@ class OpportunityDetector {
               tokenIn: swap.tokenOut, // Reversed for back-run
               tokenOut: swap.tokenIn, // Reversed for back-run
               amountIn: optimizedAmount.toString(),
-              amountOutMin: '0', // Set to 0 for simplicity - in production would use slippage tolerance
+              amountOutMin: "0", // Set to 0 for simplicity - in production would use slippage tolerance
               path: [swap.tokenOut, swap.tokenIn],
               deadline: Math.floor(Date.now() / 1000) + 300 // 5 minutes
             }
@@ -512,7 +529,7 @@ class OpportunityDetector {
   markOpportunityExecuted(opportunity, txInfo) {
     opportunity.executionTimestamp = Date.now();
     opportunity.executionTxHash = txInfo.hash;
-    opportunity.executionStatus = 'pending';
+    opportunity.executionStatus = "pending";
     
     this.executedOpportunities.set(opportunity.hash, opportunity);
     this.stats.opportunitiesExecuted++;
@@ -525,15 +542,17 @@ class OpportunityDetector {
    * @param {BigNumber} profit Actual profit amount
    */
   markOpportunitySuccessful(opportunity, receipt, profit) {
-    opportunity.executionStatus = 'success';
+    opportunity.executionStatus = "success";
     opportunity.gasUsed = receipt.gasUsed;
     opportunity.actualProfit = profit;
-    opportunity.actualProfitUsd = this.convertEthToUsd(profit);
+    
+    const profitUsd = this.convertEthToUsd(profit);
+    opportunity.actualProfitUsd = profitUsd;
     
     this.successfulOpportunities.set(opportunity.hash, opportunity);
     this.stats.opportunitiesSuccessful++;
     this.stats.totalProfitETH = this.stats.totalProfitETH.add(profit);
-    this.stats.totalProfitUSD += parseFloat(opportunity.actualProfitUsd);
+    this.stats.totalProfitUSD += parseFloat(profitUsd);
     
     const gasPrice = opportunity.gasInfo.type === 2 ? 
       opportunity.gasInfo.maxFeePerGas : 
@@ -541,7 +560,9 @@ class OpportunityDetector {
     
     const gasSpent = ethers.BigNumber.from(gasPrice).mul(receipt.gasUsed);
     this.stats.totalGasSpentETH = this.stats.totalGasSpentETH.add(gasSpent);
-    this.stats.totalGasSpentUSD += parseFloat(this.convertEthToUsd(gasSpent));
+    
+    const gasSpentUsd = this.convertEthToUsd(gasSpent);
+    this.stats.totalGasSpentUSD += parseFloat(gasSpentUsd);
   }
 
   /**
@@ -566,7 +587,7 @@ class OpportunityDetector {
           const simulation = await this.simulator.simulateMultiHop(
             path.tokens,
             path.pairs,
-            ethers.utils.parseEther('1') // Start with 1 ETH for simulation
+            ethers.utils.parseEther("1") // Start with 1 ETH for simulation
           );
           
           if (simulation.isProfit && simulation.profit.gt(this.options.minProfitThreshold)) {
@@ -574,22 +595,24 @@ class OpportunityDetector {
             const optimalAmount = await this.findOptimalMultiHopAmount(path, simulation);
             
             // Calculate gas costs
-            const gasPrice = ethers.utils.parseUnits('50', 'gwei'); // Example gas price
+            const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Example gas price
             const gasLimit = 600000; // Higher gas for multi-hop
             const gasCost = gasPrice.mul(gasLimit);
             
             // Calculate net profit
-            const netProfit = simulation.profit.mul(optimalAmount).div(ethers.utils.parseEther('1')).sub(gasCost);
+            const netProfit = simulation.profit.mul(optimalAmount).div(ethers.utils.parseEther("1")).sub(gasCost);
             
             if (netProfit.gt(this.options.minProfitThreshold)) {
+              const profitUsd = await this.convertEthToUsd(netProfit);
+              
               opportunities.push({
-                type: 'multihop',
+                type: "multihop",
                 path: path,
                 tokens: path.tokens,
                 pairs: path.pairs,
                 amount: optimalAmount.toString(),
                 estimatedProfit: netProfit,
-                estimatedProfitUsd: await this.convertEthToUsd(netProfit),
+                estimatedProfitUsd: profitUsd,
                 gasInfo: {
                   gasPrice: gasPrice.toString(),
                   gasLimit,
@@ -619,15 +642,15 @@ class OpportunityDetector {
     try {
       // Test different amounts to find optimal
       const testAmounts = [
-        ethers.utils.parseEther('0.1'),
-        ethers.utils.parseEther('0.5'),
-        ethers.utils.parseEther('1'),
-        ethers.utils.parseEther('5'),
-        ethers.utils.parseEther('10'),
-        ethers.utils.parseEther('50')
+        ethers.utils.parseEther("0.1"),
+        ethers.utils.parseEther("0.5"),
+        ethers.utils.parseEther("1"),
+        ethers.utils.parseEther("5"),
+        ethers.utils.parseEther("10"),
+        ethers.utils.parseEther("50")
       ];
       
-      let bestAmount = ethers.utils.parseEther('1'); // Default
+      let bestAmount = ethers.utils.parseEther("1"); // Default
       let bestProfit = simulation.profit;
       
       for (const amount of testAmounts) {
@@ -652,7 +675,7 @@ class OpportunityDetector {
       return bestAmount;
     } catch (error) {
       logger.error(`Error finding optimal multi-hop amount:`, error);
-      return ethers.utils.parseEther('1'); // Default fallback
+      return ethers.utils.parseEther("1"); // Default fallback
     }
   }
 
@@ -663,16 +686,16 @@ class OpportunityDetector {
    */
   async convertEthToUsd(ethAmount) {
     try {
-      // ETH/USD price lookup (could be cached/optimized)
-      const ethPrice = 2000; // Simplified example - should use real price feed
+      // Get ETH/USD price
+      const ethPriceInUsd = await getPriceInUsd(TOKEN_ADDRESSES.WETH, this.provider);
       
       const ethValue = parseFloat(ethers.utils.formatEther(ethAmount));
-      const usdValue = ethValue * ethPrice;
+      const usdValue = ethValue * parseFloat(ethPriceInUsd);
       
       return usdValue.toFixed(2);
     } catch (error) {
-      logger.error('Error converting ETH to USD:', error);
-      return '0.00';
+      logger.error("Error converting ETH to USD:", error);
+      return "0.00";
     }
   }
 
